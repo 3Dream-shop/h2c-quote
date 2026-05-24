@@ -1,4 +1,3 @@
-Index · HTML
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -56,10 +55,9 @@ textarea{width:100%;resize:vertical;min-height:80px;font-size:12px;font-family:'
 .common-card{background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;background:#EAF3DE;color:#3B6D11;font-weight:500;margin-left:8px;}
 .rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
-.machine-toggle{display:flex;gap:8px;margin-bottom:16px;}
-.toggle-btn{flex:1;padding:10px;font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#fff;color:#6b6b66;text-align:center;transition:all 0.15s;}
+.machine-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.toggle-btn{flex:1;padding:12px;font-size:15px;font-weight:500;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#fff;color:#6b6b66;text-align:center;transition:all 0.15s;user-select:none;}
 .toggle-btn.on{border-color:#3B6D11;color:#3B6D11;background:#EAF3DE;}
-.toggle-btn.off{opacity:0.4;}
 .admin-bar{display:flex;justify-content:flex-end;margin-bottom:12px;}
 .admin-badge{font-size:11px;padding:4px 10px;border-radius:4px;background:#EAF3DE;color:#3B6D11;display:flex;align-items:center;gap:5px;cursor:pointer;border:0.5px solid #C0DD97;}
 .admin-badge:hover{background:#C0DD97;}
@@ -88,10 +86,10 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
     <div class="card">
       <p class="sec"><i class="ti ti-devices"></i> 使用機種</p>
       <div class="machine-toggle">
-        <div class="toggle-btn on" id="toggle-h2c" onclick="toggleQuoteMachine('h2c')">H2C</div>
-        <div class="toggle-btn on" id="toggle-a1" onclick="toggleQuoteMachine('a1')">A1</div>
+        <div class="toggle-btn on" id="toggle-h2c" onclick="selectMachine('h2c')">H2C</div>
+        <div class="toggle-btn" id="toggle-a1" onclick="selectMachine('a1')">A1</div>
       </div>
-      <p class="note" id="toggle-note">H2C・A1 両方有効</p>
+      <p class="note" id="toggle-note">選択中：H2C</p>
     </div>
     <div class="card">
       <p class="sec"><i class="ti ti-brand-figma"></i> BambuStudio から貼り付け</p>
@@ -104,7 +102,6 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
     </div>
     <div class="card">
       <p class="sec"><i class="ti ti-adjustments"></i> 印刷パラメーター</p>
-      <div class="ir"><label>使用機種</label><select id="q-machine-sel" onchange="calcQuote()"></select></div>
       <div class="ir"><label>印刷時間（分）</label><input type="number" id="print-min" value="120" min="1" oninput="calcQuote()"></div>
       <div class="ir"><label>フィラメント（g）</label><input type="number" id="filament-g" value="50" min="0" step="0.1" oninput="calcQuote()"></div>
       <div class="ir"><label>素材</label><select id="mat-select" onchange="calcQuote()"></select></div>
@@ -137,14 +134,8 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
       <div class="sr"><span class="sl">その他管理費（月）</span><input type="range" min="0" max="30000" step="1000" value="10000" id="c-other" oninput="syncAll()"><span class="sv" id="c-other-out">¥10,000</span></div>
     </div>
     <div class="machine-tabs">
-      <div class="mtab active" id="mtab-h2c" onclick="switchMachine('h2c')">
-        <input type="checkbox" id="chk-h2c" checked onchange="toggleMachine('h2c')" onclick="event.stopPropagation()">
-        <span>H2C</span>
-      </div>
-      <div class="mtab" id="mtab-a1" onclick="switchMachine('a1')">
-        <input type="checkbox" id="chk-a1" checked onchange="toggleMachine('a1')" onclick="event.stopPropagation()">
-        <span>A1</span>
-      </div>
+      <div class="mtab active" id="mtab-h2c" onclick="switchMachine('h2c')"><span>H2C</span></div>
+      <div class="mtab" id="mtab-a1" onclick="switchMachine('a1')"><span>A1</span></div>
     </div>
     <div id="mpanel-h2c" class="machine-panel active">
       <div class="card">
@@ -222,7 +213,7 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
 const fmt=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
 const fmtD=(n,d)=>'¥'+n.toFixed(d);
 let materials=[{name:'PLA',pricePerG:3,color:'各色'},{name:'PETG',pricePerG:4,color:'各色'},{name:'ASA',pricePerG:6,color:'各色'},{name:'ABS',pricePerG:4,color:'各色'},{name:'TPU',pricePerG:8,color:'各色'}];
-let machineEnabled={h2c:true,a1:true};
+let selectedMachine='h2c';
 let unlocked={settings:false,materials:false};
 let pendingTab=null;
  
@@ -268,17 +259,13 @@ function lockTab(name){
   document.getElementById('panel-quote').classList.add('active');
 }
  
-function toggleQuoteMachine(name){
-  machineEnabled[name]=!machineEnabled[name];
-  const enabled=Object.values(machineEnabled).filter(Boolean).length;
-  if(enabled===0){machineEnabled[name]=true;}
+function selectMachine(name){
+  selectedMachine=name;
   ['h2c','a1'].forEach(k=>{
-    document.getElementById('toggle-'+k).className='toggle-btn'+(machineEnabled[k]?' on':' off');
+    document.getElementById('toggle-'+k).className='toggle-btn'+(k===name?' on':'');
   });
-  const labels={h2c:'H2C',a1:'A1'};
-  const active=Object.entries(machineEnabled).filter(([k,v])=>v).map(([k])=>labels[k]);
-  document.getElementById('toggle-note').textContent=active.join('・')+' 有効';
-  updateMachineSelect();calcQuote();
+  document.getElementById('toggle-note').textContent='選択中：'+name.toUpperCase();
+  calcQuote();
 }
  
 function switchMachine(name){
@@ -286,11 +273,6 @@ function switchMachine(name){
   document.querySelectorAll('.machine-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('mtab-'+name).classList.add('active');
   document.getElementById('mpanel-'+name).classList.add('active');
-}
- 
-function toggleMachine(name){
-  machineEnabled[name]=document.getElementById('chk-'+name).checked;
-  updateMachineSelect();calcQuote();
 }
  
 function getCommon(){return{elec:+document.getElementById('c-elec').value,other:+document.getElementById('c-other').value};}
@@ -326,13 +308,6 @@ function syncAll(){
   calcQuote();
 }
  
-function updateMachineSelect(){
-  const sel=document.getElementById('q-machine-sel');
-  const prev=sel.value;
-  sel.innerHTML=Object.entries(machineEnabled).filter(([k,v])=>v).map(([k])=>`<option value="${k}">${k.toUpperCase()}</option>`).join('');
-  if([...sel.options].some(o=>o.value===prev))sel.value=prev;
-}
- 
 function renderMaterials(){
   const list=document.getElementById('mat-list');
   const sel=document.getElementById('mat-select');
@@ -355,9 +330,7 @@ function addMaterial(){
 function removeMaterial(i){if(materials.length<=1)return;materials.splice(i,1);renderMaterials();calcQuote();}
  
 function calcQuote(){
-  const prefix=document.getElementById('q-machine-sel').value||'h2c';
-  if(!machineEnabled[prefix])return;
-  const{recRate,elecPerMin,margin}=calcRate(prefix);
+  const{recRate,elecPerMin,margin}=calcRate(selectedMachine);
   const mins=+document.getElementById('print-min').value||0;
   const grams=+document.getElementById('filament-g').value||0;
   const qty=+document.getElementById('qty').value||1;
@@ -371,7 +344,7 @@ function calcQuote(){
   document.getElementById('q-margin-tag').textContent='利益率'+margin+'%込み';
   document.getElementById('q-qty-label').textContent=qty+'個';
   document.getElementById('q-total-qty').textContent=fmt(ct*qty);
-  document.getElementById('q-rate-note').textContent=`${prefix.toUpperCase()} 推奨単価：${fmt(recRate*60)}/h ／ ${mat.name} ¥${mat.pricePerG}/g`;
+  document.getElementById('q-rate-note').textContent=`${selectedMachine.toUpperCase()} 推奨単価：${fmt(recRate*60)}/h ／ ${mat.name} ¥${mat.pricePerG}/g`;
 }
  
 function parseBambu(){
@@ -388,8 +361,7 @@ function parseBambu(){
  
 function clearBambu(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';}
  
-updateMachineSelect();renderMaterials();syncAll();
+renderMaterials();syncAll();
 </script>
 </body>
 </html>
- 
