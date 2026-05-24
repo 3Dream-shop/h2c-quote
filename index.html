@@ -421,19 +421,14 @@ function removeMaterial(i){
 };
 
 function calcQuote(){
-  const{recRate,elecPerMin,margin}=calcRate(selectedMachine);
+  const{recRate,elecPerMin}=calcRate(selectedMachine);
   const mins=+document.getElementById('print-min').value||0;
   const grams=+document.getElementById('filament-g').value||0;
-  const qty=+document.getElementById('qty').value||1;
   const mat=materials[+document.getElementById('mat-select').value]||materials[0];
-  const mf=recRate*mins,ef=elecPerMin*mins,ff=grams*mat.pricePerG,ct=mf+ef+ff;
-  document.getElementById('q-machine-fee').textContent=fmt(mf);
-  document.getElementById('q-elec-fee').textContent=fmt(ef);
-  document.getElementById('q-filament-fee').textContent=`${fmt(ff)}（${grams}g × ¥${mat.pricePerG}/g）`;
-  document.getElementById('q-cost-total').textContent=fmt(ct);
+  const ct=recRate*mins+elecPerMin*mins+grams*mat.pricePerG;
   document.getElementById('q-total').textContent=fmt(ct);
-  document.getElementById('q-qty-label').textContent=qty+'個';
-  document.getElementById('q-total-qty').textContent=fmt(ct*qty);
+  document.getElementById('q-machine-label').textContent=selectedMachine.toUpperCase()+' · '+mat.name;
+  document.getElementById('q-detail').textContent='印刷時間 '+mins+'分 · フィラメント '+grams+'g';
 }
 
 function parseBambu(){
