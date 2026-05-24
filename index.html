@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>H2C 料金算出ツール</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;font-size:14px;line-height:1.6;}
@@ -210,9 +212,8 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
 </div>
 
 <!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+<script>
+// Firebase SDKs loaded via compat scripts in head
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSVqvu7f-p15Az5Z-zhkqnf6FLwH89gks",
@@ -223,8 +224,8 @@ const firebaseConfig = {
   appId: "1:35749878551:web:3b58ba5799f15627837552"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 const fmt=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
 const fmtD=(n,d)=>'¥'+n.toFixed(d);
@@ -252,7 +253,7 @@ async function saveSettings(){
       materials:materials,
       updatedAt:new Date().toISOString()
     };
-    await setDoc(doc(db,'settings','main'),data);
+    await db.collection('settings').doc('main').set(data);
     setStatus('saved','保存済み');
   }catch(e){
     setStatus('error','保存失敗');
@@ -267,7 +268,7 @@ function scheduleSave(){
 
 async function loadSettings(){
   try{
-    const snap=await getDoc(doc(db,'settings','main'));
+    const snap=await db.collection('settings').doc('main').get();
     if(!snap.exists())return;
     const d=snap.data();
     if(d.common){
@@ -295,14 +296,14 @@ async function loadSettings(){
   }
 }
 
-window.switchTab=function(name,el){
+function switchTab(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
 };
 
-window.tryUnlock=function(name,el){
+function tryUnlock(name,el){
   if(unlocked[name]){window.switchTab(name,el);return;}
   pendingTab={name,el};
   document.getElementById('pw-input').value='';
@@ -311,7 +312,7 @@ window.tryUnlock=function(name,el){
   setTimeout(()=>document.getElementById('pw-input').focus(),50);
 };
 
-window.checkPw=function(){
+function checkPw(){
   if(document.getElementById('pw-input').value==='3dream'){
     unlocked[pendingTab.name]=true;
     const tab=document.getElementById('tab-'+pendingTab.name);
@@ -325,9 +326,9 @@ window.checkPw=function(){
   }
 };
 
-window.closeModal=function(){document.getElementById('lock-modal').classList.remove('show');};
+function closeModal(){document.getElementById('lock-modal').classList.remove('show');};
 
-window.lockTab=function(name){
+function lockTab(name){
   unlocked[name]=false;
   const tab=document.getElementById('tab-'+name);
   tab.innerHTML=name==='settings'?'<i class="ti ti-lock"></i> 機械設定':'<i class="ti ti-lock"></i> 素材管理';
@@ -337,7 +338,7 @@ window.lockTab=function(name){
   document.getElementById('panel-quote').classList.add('active');
 };
 
-window.selectMachine=function(name){
+function selectMachine(name){
   selectedMachine=name;
   ['h2c','a1'].forEach(k=>{
     document.getElementById('toggle-'+k).className='toggle-btn'+(k===name?' on':'');
@@ -346,7 +347,7 @@ window.selectMachine=function(name){
   calcQuote();
 };
 
-window.switchMachine=function(name){
+function switchMachine(name){
   document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.machine-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('mtab-'+name).classList.add('active');
@@ -373,7 +374,7 @@ function syncSlider(id,suffix){
   el.textContent=suffix==='¥'?fmt(v):suffix==='elec'?'¥'+v:v+suffix;
 }
 
-window.syncAll=function(){
+function syncAll(){
   syncSlider('c-elec','elec');syncSlider('c-other','¥');
   ['h2c','a1'].forEach(p=>{
     ['machine','consumable'].forEach(k=>syncSlider(p+'-'+k,'¥'));
@@ -387,7 +388,7 @@ window.syncAll=function(){
   scheduleSave();
 };
 
-window.renderMaterials=function(){
+function renderMaterials(){
   const list=document.getElementById('mat-list');
   const sel=document.getElementById('mat-select');
   const prev=sel?sel.value:'0';
@@ -396,7 +397,7 @@ window.renderMaterials=function(){
   sel.value=Math.min(+prev,materials.length-1);
 };
 
-window.addMaterial=function(){
+function addMaterial(){
   const name=document.getElementById('new-mat-name').value.trim();
   const price=+document.getElementById('new-mat-price').value;
   const color=document.getElementById('new-mat-color').value.trim();
@@ -406,13 +407,13 @@ window.addMaterial=function(){
   renderMaterials();calcQuote();scheduleSave();
 };
 
-window.removeMaterial=function(i){
+function removeMaterial(i){
   if(materials.length<=1)return;
   materials.splice(i,1);
   renderMaterials();calcQuote();scheduleSave();
 };
 
-window.calcQuote=function(){
+function calcQuote(){
   const{recRate,elecPerMin,margin}=calcRate(selectedMachine);
   const mins=+document.getElementById('print-min').value||0;
   const grams=+document.getElementById('filament-g').value||0;
@@ -428,7 +429,7 @@ window.calcQuote=function(){
   document.getElementById('q-total-qty').textContent=fmt(ct*qty);
 }
 
-window.parseBambu=function(){
+function parseBambu(){
   const raw=document.getElementById('bambu-input').value;let mins=null,grams=null;
   const tp=[/(\d+)\s*h\s*(\d+)\s*m/i,/(\d+)\s*時間\s*(\d+)\s*分/,/(\d+):(\d+)/,/(\d+)\s*h(?!r)/i,/(\d+)\s*時間/,/(\d+)\s*分/];
   for(const p of tp){const m=raw.match(p);if(!m)continue;if(m[2]!==undefined){mins=+m[1]*60+ +m[2];}else{mins=+m[1]*60;}break;}
@@ -440,7 +441,7 @@ window.parseBambu=function(){
   calcQuote();
 };
 
-window.clearBambu=function(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';};
+function clearBambu(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';};
 
 renderMaterials();
 syncAll();
