@@ -108,10 +108,11 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
     </div>
     <div class="card">
       <p class="sec"><i class="ti ti-adjustments"></i> 印刷パラメーター</p>
-      <div class="ir"><label>印刷時間（分）</label><input type="number" id="print-min" value="120" min="1" oninput="calcQuote()"></div>
-      <div class="ir"><label>フィラメント（g）</label><input type="number" id="filament-g" value="50" min="0" step="0.1" oninput="calcQuote()"></div>
-      <div class="ir"><label>素材</label><select id="mat-select" onchange="calcQuote()"></select></div>
-      <div class="ir"><label>数量</label><input type="number" id="qty" value="1" min="1" oninput="calcQuote()"></div>
+      <div class="ir"><label>印刷時間（分）</label><input type="number" id="print-min" value="120" min="1"></div>
+      <div class="ir"><label>フィラメント（g）</label><input type="number" id="filament-g" value="50" min="0" step="0.1"></div>
+      <div class="ir"><label>素材</label><select id="mat-select"></select></div>
+      <div class="ir"><label>数量</label><input type="number" id="qty" value="1" min="1"></div>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:8px;border-color:#3B6D11;color:#3B6D11;font-size:14px;padding:11px;" onclick="calcQuote()"><i class="ti ti-calculator"></i> 見積もりを確定</button>
     </div>
     <div class="card">
       <p class="sec"><i class="ti ti-receipt"></i> 見積もり内訳</p>
