@@ -418,7 +418,7 @@ window.removeMaterial=function(i){
   renderMaterials();calcQuote();scheduleSave();
 };
 
-function calcQuote(){
+window.calcQuote=function(){
   const{recRate,elecPerMin,margin}=calcRate(selectedMachine);
   const mins=+document.getElementById('print-min').value||0;
   const grams=+document.getElementById('filament-g').value||0;
