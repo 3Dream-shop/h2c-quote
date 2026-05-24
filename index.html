@@ -9,9 +9,13 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;font-size:14px;line-height:1.6;}
 .container{max-width:720px;margin:0 auto;padding:24px 16px 80px;}
-header{margin-bottom:24px;}
+header{margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
 header h1{font-size:20px;font-weight:600;letter-spacing:-0.02em;}
 header p{font-size:12px;color:#6b6b66;margin-top:2px;}
+.save-status{font-size:11px;padding:4px 10px;border-radius:4px;display:flex;align-items:center;gap:4px;}
+.save-status.saved{background:#EAF3DE;color:#3B6D11;}
+.save-status.saving{background:#FAEEDA;color:#854F0B;}
+.save-status.error{background:#FCEBEB;color:#A32D2D;}
 .tabs{display:flex;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;overflow:hidden;margin-bottom:20px;}
 .tab{flex:1;padding:10px 8px;font-size:13px;cursor:pointer;border:none;background:transparent;color:#6b6b66;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;}
 .tab:hover{background:#f5f4f0;color:#1a1a18;}
@@ -50,7 +54,6 @@ textarea{width:100%;resize:vertical;min-height:80px;font-size:12px;font-family:'
 .machine-tabs{display:flex;gap:8px;margin-bottom:14px;}
 .mtab{flex:1;padding:8px 10px;font-size:13px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#fff;color:#6b6b66;text-align:center;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .mtab.active{border-color:#3B6D11;color:#3B6D11;background:#EAF3DE;}
-.mtab input[type=checkbox]{accent-color:#3B6D11;width:14px;height:14px;}
 .machine-panel{display:none;}.machine-panel.active{display:block;}
 .common-card{background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;background:#EAF3DE;color:#3B6D11;font-weight:500;margin-left:8px;}
@@ -71,16 +74,19 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
 <body>
 <div class="container">
   <header>
-    <h1>H2C 料金算出ツール</h1>
-    <p>Bambu Lab H2C · A1 · 時間貸し見積もり · BambuStudio連携対応</p>
+    <div>
+      <h1>H2C 料金算出ツール</h1>
+      <p>Bambu Lab H2C · A1 · 時間貸し見積もり · BambuStudio連携対応</p>
+    </div>
+    <div id="save-status" class="save-status saved"><i class="ti ti-cloud-check"></i> 保存済み</div>
   </header>
- 
+
   <div class="tabs">
     <button class="tab active" id="tab-quote" onclick="switchTab('quote',this)"><i class="ti ti-calculator"></i> 見積もり</button>
     <button class="tab" id="tab-settings" onclick="tryUnlock('settings',this)"><i class="ti ti-lock"></i> 機械設定</button>
     <button class="tab" id="tab-materials" onclick="tryUnlock('materials',this)"><i class="ti ti-lock"></i> 素材管理</button>
   </div>
- 
+
   <!-- 見積もり -->
   <div id="panel-quote" class="panel active">
     <div class="card">
@@ -122,7 +128,7 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
       <p class="note" id="q-rate-note"></p>
     </div>
   </div>
- 
+
   <!-- 機械設定 -->
   <div id="panel-settings" class="panel">
     <div class="admin-bar">
@@ -172,7 +178,7 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
       </div>
     </div>
   </div>
- 
+
   <!-- 素材管理 -->
   <div id="panel-materials" class="panel">
     <div class="admin-bar">
@@ -190,10 +196,10 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
       <button class="btn" onclick="addMaterial()"><i class="ti ti-plus"></i> 追加</button>
     </div>
   </div>
- 
+
   <footer>H2C Quote Tool · 三栄産業 / 3DREAM</footer>
 </div>
- 
+
 <!-- パスワードモーダル -->
 <div id="lock-modal" class="modal-overlay">
   <div class="modal-box">
@@ -208,48 +214,126 @@ footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
     </div>
   </div>
 </div>
- 
-<script>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCSVqvu7f-p15Az5Z-zhkqnf6FLwH89gks",
+  authDomain: "h2c-quote.firebaseapp.com",
+  projectId: "h2c-quote",
+  storageBucket: "h2c-quote.firebasestorage.app",
+  messagingSenderId: "35749878551",
+  appId: "1:35749878551:web:3b58ba5799f15627837552"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const fmt=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
 const fmtD=(n,d)=>'¥'+n.toFixed(d);
-let materials=[{name:'PLA',pricePerG:3,color:'各色'},{name:'PETG',pricePerG:4,color:'各色'},{name:'ASA',pricePerG:6,color:'各色'},{name:'ABS',pricePerG:4,color:'各色'},{name:'TPU',pricePerG:8,color:'各色'}];
+
+const DEFAULT_MATERIALS=[{name:'PLA',pricePerG:3,color:'各色'},{name:'PETG',pricePerG:4,color:'各色'},{name:'ASA',pricePerG:6,color:'各色'},{name:'ABS',pricePerG:4,color:'各色'},{name:'TPU',pricePerG:8,color:'各色'}];
+let materials=[...DEFAULT_MATERIALS];
 let selectedMachine='h2c';
 let unlocked={settings:false,materials:false};
 let pendingTab=null;
- 
-function switchTab(name,el){
+let saveTimer=null;
+
+function setStatus(type,msg){
+  const el=document.getElementById('save-status');
+  el.className='save-status '+type;
+  el.innerHTML=type==='saved'?`<i class="ti ti-cloud-check"></i> ${msg}`:type==='saving'?`<i class="ti ti-cloud-upload"></i> ${msg}`:`<i class="ti ti-cloud-off"></i> ${msg}`;
+}
+
+async function saveSettings(){
+  setStatus('saving','保存中...');
+  try{
+    const data={
+      common:{elec:+document.getElementById('c-elec').value,other:+document.getElementById('c-other').value},
+      h2c:{machine:+document.getElementById('h2c-machine').value,years:+document.getElementById('h2c-years').value,days:+document.getElementById('h2c-days').value,hours:+document.getElementById('h2c-hours').value,util:+document.getElementById('h2c-util').value,consumable:+document.getElementById('h2c-consumable').value,margin:+document.getElementById('h2c-margin').value},
+      a1:{machine:+document.getElementById('a1-machine').value,years:+document.getElementById('a1-years').value,days:+document.getElementById('a1-days').value,hours:+document.getElementById('a1-hours').value,util:+document.getElementById('a1-util').value,consumable:+document.getElementById('a1-consumable').value,margin:+document.getElementById('a1-margin').value},
+      materials:materials,
+      updatedAt:new Date().toISOString()
+    };
+    await setDoc(doc(db,'settings','main'),data);
+    setStatus('saved','保存済み');
+  }catch(e){
+    setStatus('error','保存失敗');
+    console.error(e);
+  }
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveSettings,1500);
+}
+
+async function loadSettings(){
+  try{
+    const snap=await getDoc(doc(db,'settings','main'));
+    if(!snap.exists())return;
+    const d=snap.data();
+    if(d.common){
+      document.getElementById('c-elec').value=d.common.elec??25;
+      document.getElementById('c-other').value=d.common.other??10000;
+    }
+    ['h2c','a1'].forEach(p=>{
+      if(d[p]){
+        document.getElementById(p+'-machine').value=d[p].machine??400000;
+        document.getElementById(p+'-years').value=d[p].years??2;
+        document.getElementById(p+'-days').value=d[p].days??200;
+        document.getElementById(p+'-hours').value=d[p].hours??8;
+        document.getElementById(p+'-util').value=d[p].util??70;
+        document.getElementById(p+'-consumable').value=d[p].consumable??5000;
+        document.getElementById(p+'-margin').value=d[p].margin??20;
+      }
+    });
+    if(d.materials&&d.materials.length>0)materials=d.materials;
+    renderMaterials();
+    syncAll();
+    setStatus('saved','保存済み');
+  }catch(e){
+    setStatus('error','読込失敗');
+    console.error(e);
+  }
+}
+
+window.switchTab=function(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
-}
- 
-function tryUnlock(name,el){
-  if(unlocked[name]){switchTab(name,el);return;}
+};
+
+window.tryUnlock=function(name,el){
+  if(unlocked[name]){window.switchTab(name,el);return;}
   pendingTab={name,el};
   document.getElementById('pw-input').value='';
   document.getElementById('pw-err').textContent='';
   document.getElementById('lock-modal').classList.add('show');
   setTimeout(()=>document.getElementById('pw-input').focus(),50);
-}
- 
-function checkPw(){
+};
+
+window.checkPw=function(){
   if(document.getElementById('pw-input').value==='3dream'){
     unlocked[pendingTab.name]=true;
     const tab=document.getElementById('tab-'+pendingTab.name);
     tab.innerHTML=pendingTab.name==='settings'?'<i class="ti ti-settings"></i> 機械設定':'<i class="ti ti-package"></i> 素材管理';
-    closeModal();
-    switchTab(pendingTab.name,tab);
+    window.closeModal();
+    window.switchTab(pendingTab.name,tab);
   }else{
     document.getElementById('pw-err').textContent='パスワードが違います';
     document.getElementById('pw-input').value='';
     document.getElementById('pw-input').focus();
   }
-}
- 
-function closeModal(){document.getElementById('lock-modal').classList.remove('show');}
- 
-function lockTab(name){
+};
+
+window.closeModal=function(){document.getElementById('lock-modal').classList.remove('show');};
+
+window.lockTab=function(name){
   unlocked[name]=false;
   const tab=document.getElementById('tab-'+name);
   tab.innerHTML=name==='settings'?'<i class="ti ti-lock"></i> 機械設定':'<i class="ti ti-lock"></i> 素材管理';
@@ -257,30 +341,30 @@ function lockTab(name){
   document.getElementById('panel-'+name).classList.remove('active');
   document.getElementById('tab-quote').classList.add('active');
   document.getElementById('panel-quote').classList.add('active');
-}
- 
-function selectMachine(name){
+};
+
+window.selectMachine=function(name){
   selectedMachine=name;
   ['h2c','a1'].forEach(k=>{
     document.getElementById('toggle-'+k).className='toggle-btn'+(k===name?' on':'');
   });
   document.getElementById('toggle-note').textContent='選択中：'+name.toUpperCase();
   calcQuote();
-}
- 
-function switchMachine(name){
+};
+
+window.switchMachine=function(name){
   document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.machine-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('mtab-'+name).classList.add('active');
   document.getElementById('mpanel-'+name).classList.add('active');
-}
- 
+};
+
 function getCommon(){return{elec:+document.getElementById('c-elec').value,other:+document.getElementById('c-other').value};}
- 
+
 function getMachineSettings(p){
   return{machine:+document.getElementById(p+'-machine').value,years:+document.getElementById(p+'-years').value,days:+document.getElementById(p+'-days').value,hours:+document.getElementById(p+'-hours').value,util:+document.getElementById(p+'-util').value,consumable:+document.getElementById(p+'-consumable').value,margin:+document.getElementById(p+'-margin').value};
 }
- 
+
 function calcRate(p){
   const s=getMachineSettings(p);const c=getCommon();
   const ah=s.days*s.hours*s.util/100;
@@ -288,14 +372,14 @@ function calcRate(p){
   const base=tc/(ah*60);
   return{baseRate:base,recRate:base/(1-s.margin/100),elecPerMin:0.4*c.elec/60,margin:s.margin};
 }
- 
+
 function syncSlider(id,suffix){
   const v=+document.getElementById(id).value;
   const el=document.getElementById(id+'-out');if(!el)return;
   el.textContent=suffix==='¥'?fmt(v):suffix==='elec'?'¥'+v:v+suffix;
 }
- 
-function syncAll(){
+
+window.syncAll=function(){
   syncSlider('c-elec','elec');syncSlider('c-other','¥');
   ['h2c','a1'].forEach(p=>{
     ['machine','consumable'].forEach(k=>syncSlider(p+'-'+k,'¥'));
@@ -306,29 +390,34 @@ function syncAll(){
     document.getElementById(p+'-rec-rate').textContent=fmt(recRate*60);
   });
   calcQuote();
-}
- 
-function renderMaterials(){
+  scheduleSave();
+};
+
+window.renderMaterials=function(){
   const list=document.getElementById('mat-list');
   const sel=document.getElementById('mat-select');
   const prev=sel?sel.value:'0';
   list.innerHTML=materials.map((m,i)=>`<div class="mat-row"><span class="mat-name">${m.name} <span style="font-size:11px;color:#6b6b66;">${m.color||''}</span></span><span class="mat-price">¥${m.pricePerG.toFixed(1)}/g</span><button class="btn" style="padding:3px 8px;font-size:11px;" onclick="removeMaterial(${i})"><i class="ti ti-trash"></i></button></div>`).join('');
   sel.innerHTML=materials.map((m,i)=>`<option value="${i}">${m.name}</option>`).join('');
   sel.value=Math.min(+prev,materials.length-1);
-}
- 
-function addMaterial(){
+};
+
+window.addMaterial=function(){
   const name=document.getElementById('new-mat-name').value.trim();
   const price=+document.getElementById('new-mat-price').value;
   const color=document.getElementById('new-mat-color').value.trim();
   if(!name||isNaN(price))return;
   materials.push({name,pricePerG:price,color});
   document.getElementById('new-mat-name').value='';document.getElementById('new-mat-color').value='';
-  renderMaterials();calcQuote();
-}
- 
-function removeMaterial(i){if(materials.length<=1)return;materials.splice(i,1);renderMaterials();calcQuote();}
- 
+  renderMaterials();calcQuote();scheduleSave();
+};
+
+window.removeMaterial=function(i){
+  if(materials.length<=1)return;
+  materials.splice(i,1);
+  renderMaterials();calcQuote();scheduleSave();
+};
+
 function calcQuote(){
   const{recRate,elecPerMin,margin}=calcRate(selectedMachine);
   const mins=+document.getElementById('print-min').value||0;
@@ -346,8 +435,8 @@ function calcQuote(){
   document.getElementById('q-total-qty').textContent=fmt(ct*qty);
   document.getElementById('q-rate-note').textContent=`${selectedMachine.toUpperCase()} 推奨単価：${fmt(recRate*60)}/h ／ ${mat.name} ¥${mat.pricePerG}/g`;
 }
- 
-function parseBambu(){
+
+window.parseBambu=function(){
   const raw=document.getElementById('bambu-input').value;let mins=null,grams=null;
   const tp=[/(\d+)\s*h\s*(\d+)\s*m/i,/(\d+)\s*時間\s*(\d+)\s*分/,/(\d+):(\d+)/,/(\d+)\s*h(?!r)/i,/(\d+)\s*時間/,/(\d+)\s*分/];
   for(const p of tp){const m=raw.match(p);if(!m)continue;if(m[2]!==undefined){mins=+m[1]*60+ +m[2];}else{mins=+m[1]*60;}break;}
@@ -357,11 +446,13 @@ function parseBambu(){
   if(grams!==null)document.getElementById('filament-g').value=grams;
   document.getElementById('bambu-input').style.borderColor=(mins!==null||grams!==null)?'#3B6D11':'#A32D2D';
   calcQuote();
-}
- 
-function clearBambu(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';}
- 
-renderMaterials();syncAll();
+};
+
+window.clearBambu=function(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';};
+
+renderMaterials();
+syncAll();
+loadSettings();
 </script>
 </body>
 </html>
