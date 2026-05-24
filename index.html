@@ -1,3 +1,4 @@
+Index · HTML
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,342 +7,389 @@
 <title>H2C 料金算出ツール</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #f5f4f0;
-  --surface: #ffffff;
-  --border: rgba(0,0,0,0.1);
-  --border-md: rgba(0,0,0,0.2);
-  --text: #1a1a18;
-  --text-muted: #6b6b66;
-  --text-hint: #9b9b94;
-  --accent: #2d5a1b;
-  --accent-light: #eaf3de;
-  --accent-text: #3b6d11;
-  --warn: #854f0b;
-  --warn-light: #faeeda;
-  --danger: #a32d2d;
-  --danger-light: #fcebeb;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --font: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-  --font-mono: 'Courier New', monospace;
-}
-body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.6; }
-.container { max-width: 720px; margin: 0 auto; padding: 24px 16px 80px; }
-header { margin-bottom: 24px; }
-header h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
-header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.tabs { display: flex; gap: 0; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; }
-.tab { flex: 1; padding: 10px 8px; font-size: 13px; font-family: var(--font); cursor: pointer; border: none; background: transparent; color: var(--text-muted); transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-.tab:hover { background: var(--bg); color: var(--text); }
-.tab.active { background: var(--bg); color: var(--text); font-weight: 500; }
-.panel { display: none; }
-.panel.active { display: block; }
-.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 14px; }
-.section-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
-.row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
-.row:last-child { border-bottom: none; }
-.rl { color: var(--text-muted); }
-.rv { font-weight: 500; }
-.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.sl { font-size: 12px; color: var(--text-muted); min-width: 120px; }
-.sv { font-size: 12px; font-weight: 500; min-width: 75px; text-align: right; }
-input[type=range] { flex: 1; height: 4px; border-radius: 2px; accent-color: var(--accent); cursor: pointer; }
-.input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.input-row label { font-size: 12px; color: var(--text-muted); min-width: 120px; }
-input[type=number], select, textarea { font-family: var(--font); font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-input[type=number]:focus, select:focus, textarea:focus { border-color: var(--accent); }
-input[type=number] { flex: 1; }
-select { flex: 1; }
-textarea { width: 100%; resize: vertical; min-height: 88px; font-family: var(--font-mono); font-size: 12px; }
-.btn { padding: 7px 14px; font-size: 12px; font-family: var(--font); border-radius: var(--radius-sm); cursor: pointer; border: 0.5px solid var(--border-md); background: var(--bg); color: var(--text); transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
-.btn:hover { background: var(--surface); border-color: var(--accent); }
-.btn-row { display: flex; gap: 8px; margin-top: 10px; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.metric { background: var(--bg); border-radius: var(--radius-md); padding: 12px 14px; }
-.ml { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
-.mv { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
-.ms { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
-.divider { border: none; border-top: 0.5px solid var(--border); margin: 12px 0; }
-.note { font-size: 10px; color: var(--text-hint); margin-top: 8px; font-style: italic; }
-.big-total { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
-.tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; margin-left: 6px; font-weight: 500; }
-.tag-green { background: var(--accent-light); color: var(--accent-text); }
-.tag-amber { background: var(--warn-light); color: var(--warn); }
-.mat-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
-.mat-row:last-child { border-bottom: none; }
-.mat-name { flex: 1; font-weight: 500; }
-.mat-price { color: var(--text-muted); min-width: 80px; text-align: right; }
-.profit-pos { color: var(--accent-text); }
-.profit-neg { color: var(--danger); }
-.bambu-hint { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.8; font-family: var(--font-mono); }
-footer { text-align: center; font-size: 11px; color: var(--text-hint); padding: 24px 0; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;font-size:14px;line-height:1.6;}
+.container{max-width:720px;margin:0 auto;padding:24px 16px 80px;}
+header{margin-bottom:24px;}
+header h1{font-size:20px;font-weight:600;letter-spacing:-0.02em;}
+header p{font-size:12px;color:#6b6b66;margin-top:2px;}
+.tabs{display:flex;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab{flex:1;padding:10px 8px;font-size:13px;cursor:pointer;border:none;background:transparent;color:#6b6b66;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;}
+.tab:hover{background:#f5f4f0;color:#1a1a18;}
+.tab.active{background:#f5f4f0;color:#1a1a18;font-weight:500;}
+.panel{display:none;}.panel.active{display:block;}
+.card{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:16px 18px;margin-bottom:14px;}
+.sec{font-size:10px;font-weight:500;color:#6b6b66;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;display:flex;align-items:center;gap:5px;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);font-size:13px;}
+.row:last-child{border-bottom:none;}
+.rl{color:#6b6b66;}.rv{font-weight:500;}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sl{font-size:12px;color:#6b6b66;min-width:115px;}
+.sv{font-size:12px;font-weight:500;min-width:72px;text-align:right;}
+input[type=range]{flex:1;accent-color:#3B6D11;}
+.ir{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ir label{font-size:12px;color:#6b6b66;min-width:115px;}
+input[type=number],select,textarea,input[type=text],input[type=password]{font-size:13px;padding:7px 10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:#f5f4f0;color:#1a1a18;outline:none;transition:border-color 0.15s;font-family:inherit;}
+input[type=number]:focus,select:focus,textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:#3B6D11;}
+input[type=number]{flex:1;}select{flex:1;}
+textarea{width:100%;resize:vertical;min-height:80px;font-size:12px;font-family:'Courier New',monospace;}
+.btn{padding:7px 13px;font-size:12px;border-radius:8px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.2);background:#f5f4f0;color:#1a1a18;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;font-family:inherit;}
+.btn:hover{border-color:#3B6D11;}
+.btn-row{display:flex;gap:8px;margin-top:10px;}
+.metric{background:#f5f4f0;border-radius:8px;padding:12px 14px;}
+.ml{font-size:10px;color:#6b6b66;margin-bottom:4px;}
+.mv{font-size:17px;font-weight:500;letter-spacing:-0.01em;}
+.ms{font-size:10px;color:#9b9b94;margin-top:2px;}
+.divider{border:none;border-top:0.5px solid rgba(0,0,0,0.08);margin:12px 0;}
+.note{font-size:10px;color:#9b9b94;margin-top:8px;font-style:italic;}
+.big-total{font-size:26px;font-weight:500;letter-spacing:-0.02em;}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:500;}
+.tag-amber{background:#FAEEDA;color:#854F0B;}
+.mat-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);font-size:13px;}
+.mat-row:last-child{border-bottom:none;}
+.mat-name{flex:1;font-weight:500;}.mat-price{color:#6b6b66;min-width:72px;text-align:right;}
+.machine-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.mtab{flex:1;padding:8px 10px;font-size:13px;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#fff;color:#6b6b66;text-align:center;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.mtab.active{border-color:#3B6D11;color:#3B6D11;background:#EAF3DE;}
+.mtab input[type=checkbox]{accent-color:#3B6D11;width:14px;height:14px;}
+.machine-panel{display:none;}.machine-panel.active{display:block;}
+.common-card{background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.1);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;background:#EAF3DE;color:#3B6D11;font-weight:500;margin-left:8px;}
+.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.machine-toggle{display:flex;gap:8px;margin-bottom:16px;}
+.toggle-btn{flex:1;padding:10px;font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#fff;color:#6b6b66;text-align:center;transition:all 0.15s;}
+.toggle-btn.on{border-color:#3B6D11;color:#3B6D11;background:#EAF3DE;}
+.toggle-btn.off{opacity:0.4;}
+.admin-bar{display:flex;justify-content:flex-end;margin-bottom:12px;}
+.admin-badge{font-size:11px;padding:4px 10px;border-radius:4px;background:#EAF3DE;color:#3B6D11;display:flex;align-items:center;gap:5px;cursor:pointer;border:0.5px solid #C0DD97;}
+.admin-badge:hover{background:#C0DD97;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:14px;padding:32px 28px;width:280px;text-align:center;border:0.5px solid rgba(0,0,0,0.1);}
+.err-msg{font-size:11px;color:#A32D2D;margin-top:8px;min-height:16px;}
+footer{text-align:center;font-size:11px;color:#9b9b94;padding:24px 0;}
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <h1>H2C 料金算出ツール</h1>
-    <p>Bambu Lab H2C · 時間貸し見積もり · BambuStudio連携対応</p>
+    <p>Bambu Lab H2C · A1 · 時間貸し見積もり · BambuStudio連携対応</p>
   </header>
-
+ 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('quote',this)"><i class="ti ti-calculator"></i> 見積もり</button>
-    <button class="tab" onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> 機械設定</button>
-    <button class="tab" onclick="switchTab('materials',this)"><i class="ti ti-package"></i> 素材管理</button>
+    <button class="tab active" id="tab-quote" onclick="switchTab('quote',this)"><i class="ti ti-calculator"></i> 見積もり</button>
+    <button class="tab" id="tab-settings" onclick="tryUnlock('settings',this)"><i class="ti ti-lock"></i> 機械設定</button>
+    <button class="tab" id="tab-materials" onclick="tryUnlock('materials',this)"><i class="ti ti-lock"></i> 素材管理</button>
   </div>
-
+ 
+  <!-- 見積もり -->
   <div id="panel-quote" class="panel active">
     <div class="card">
-      <p class="section-label"><i class="ti ti-brand-figma"></i> BambuStudio から貼り付け</p>
-      <div class="bambu-hint">例）印刷時間: 2h 34m　フィラメント: 47.3g / 15.8m</div>
-      <textarea id="bambu-input" placeholder="BambuStudioのスライス結果をここに貼り付け&#10;「2h 34m」「47.3g」など主要フォーマットに対応"></textarea>
+      <p class="sec"><i class="ti ti-devices"></i> 使用機種</p>
+      <div class="machine-toggle">
+        <div class="toggle-btn on" id="toggle-h2c" onclick="toggleQuoteMachine('h2c')">H2C</div>
+        <div class="toggle-btn on" id="toggle-a1" onclick="toggleQuoteMachine('a1')">A1</div>
+      </div>
+      <p class="note" id="toggle-note">H2C・A1 両方有効</p>
+    </div>
+    <div class="card">
+      <p class="sec"><i class="ti ti-brand-figma"></i> BambuStudio から貼り付け</p>
+      <textarea id="bambu-input" placeholder="BambuStudioのスライス結果をここに貼り付け&#10;例）印刷時間: 2h 34m　フィラメント: 47.3g"></textarea>
       <div class="btn-row">
         <button class="btn" onclick="parseBambu()"><i class="ti ti-wand"></i> 自動読み取り</button>
         <button class="btn" onclick="clearBambu()"><i class="ti ti-refresh"></i> クリア</button>
       </div>
+      <p class="note">「2h 34m」「47.3g」など主要フォーマットに対応</p>
     </div>
-
     <div class="card">
-      <p class="section-label"><i class="ti ti-adjustments"></i> 印刷パラメーター</p>
-      <div class="input-row">
-        <label>印刷時間（分）</label>
-        <input type="number" id="print-min" value="120" min="1" oninput="calcQuote()">
-      </div>
-      <div class="input-row">
-        <label>フィラメント使用量（g）</label>
-        <input type="number" id="filament-g" value="50" min="0" step="0.1" oninput="calcQuote()">
-      </div>
-      <div class="input-row">
-        <label>素材</label>
-        <select id="mat-select" onchange="calcQuote()"></select>
-      </div>
-      <div class="input-row">
-        <label>数量</label>
-        <input type="number" id="qty" value="1" min="1" oninput="calcQuote()">
-      </div>
+      <p class="sec"><i class="ti ti-adjustments"></i> 印刷パラメーター</p>
+      <div class="ir"><label>使用機種</label><select id="q-machine-sel" onchange="calcQuote()"></select></div>
+      <div class="ir"><label>印刷時間（分）</label><input type="number" id="print-min" value="120" min="1" oninput="calcQuote()"></div>
+      <div class="ir"><label>フィラメント（g）</label><input type="number" id="filament-g" value="50" min="0" step="0.1" oninput="calcQuote()"></div>
+      <div class="ir"><label>素材</label><select id="mat-select" onchange="calcQuote()"></select></div>
+      <div class="ir"><label>数量</label><input type="number" id="qty" value="1" min="1" oninput="calcQuote()"></div>
     </div>
-
     <div class="card">
-      <p class="section-label"><i class="ti ti-receipt"></i> 見積もり内訳</p>
+      <p class="sec"><i class="ti ti-receipt"></i> 見積もり内訳</p>
       <div class="row"><span class="rl">機械稼働費</span><span class="rv" id="q-machine-fee">-</span></div>
       <div class="row"><span class="rl">電気代</span><span class="rv" id="q-elec-fee">-</span></div>
       <div class="row"><span class="rl">フィラメント費</span><span class="rv" id="q-filament-fee">-</span></div>
       <div class="row"><span class="rl">原価合計</span><span class="rv" id="q-cost-total">-</span></div>
       <div class="divider"></div>
       <div class="row" style="align-items:flex-start;">
-        <span style="font-size:14px; font-weight:500; padding-top:4px;">
-          見積もり金額 <span id="q-margin-tag" class="tag tag-amber"></span>
-        </span>
+        <span style="font-size:14px;font-weight:500;padding-top:4px;">見積もり金額 <span id="q-margin-tag" class="tag tag-amber"></span></span>
         <span class="big-total" id="q-total">-</span>
       </div>
       <div class="row"><span class="rl">数量 <span id="q-qty-label"></span> 合計</span><span class="rv" id="q-total-qty">-</span></div>
       <p class="note" id="q-rate-note"></p>
     </div>
   </div>
-
+ 
+  <!-- 機械設定 -->
   <div id="panel-settings" class="panel">
-    <div class="card">
-      <p class="section-label"><i class="ti ti-cpu"></i> 機械コスト設定</p>
-      <div class="slider-row"><span class="sl">機械代</span><input type="range" min="50000" max="1000000" step="10000" value="400000" id="s-machine" oninput="syncSettings()"><span class="sv" id="s-machine-out">¥400,000</span></div>
-      <div class="slider-row"><span class="sl">償却年数</span><input type="range" min="1" max="5" step="1" value="2" id="s-years" oninput="syncSettings()"><span class="sv" id="s-years-out">2年</span></div>
-      <div class="slider-row"><span class="sl">年間稼働日数</span><input type="range" min="100" max="300" step="10" value="200" id="s-days" oninput="syncSettings()"><span class="sv" id="s-days-out">200日</span></div>
-      <div class="slider-row"><span class="sl">1日稼働時間</span><input type="range" min="4" max="16" step="1" value="8" id="s-hours" oninput="syncSettings()"><span class="sv" id="s-hours-out">8時間</span></div>
-      <div class="slider-row"><span class="sl">稼働率</span><input type="range" min="10" max="100" step="5" value="70" id="s-util" oninput="syncSettings()"><span class="sv" id="s-util-out">70%</span></div>
-      <div class="divider"></div>
-      <div class="slider-row"><span class="sl">電気代（円/kWh）</span><input type="range" min="20" max="35" step="1" value="25" id="s-elec" oninput="syncSettings()"><span class="sv" id="s-elec-out">¥25</span></div>
-      <div class="slider-row"><span class="sl">消耗品費（月）</span><input type="range" min="0" max="20000" step="1000" value="5000" id="s-consumable" oninput="syncSettings()"><span class="sv" id="s-consumable-out">¥5,000</span></div>
-      <div class="slider-row"><span class="sl">その他管理費（月）</span><input type="range" min="0" max="30000" step="1000" value="10000" id="s-other" oninput="syncSettings()"><span class="sv" id="s-other-out">¥10,000</span></div>
-      <div class="slider-row"><span class="sl">利益率目標</span><input type="range" min="0" max="50" step="5" value="20" id="s-margin" oninput="syncSettings()"><span class="sv" id="s-margin-out">20%</span></div>
+    <div class="admin-bar">
+      <div class="admin-badge" onclick="lockTab('settings')"><i class="ti ti-lock-open"></i> 管理者モード — ロックする</div>
     </div>
-    <div class="card">
-      <p class="section-label"><i class="ti ti-chart-bar"></i> 計算された時間単価</p>
-      <div class="grid3">
-        <div class="metric"><p class="ml">原価単価</p><p class="mv" id="s-base-rate">-</p><p class="ms">/分</p></div>
-        <div class="metric"><p class="ml">推奨単価</p><p class="mv" id="s-rec-rate">-</p><p class="ms">/分</p></div>
-        <div class="metric"><p class="ml">1時間換算</p><p class="mv" id="s-hour-rate">-</p><p class="ms">/時間</p></div>
+    <div class="common-card">
+      <p class="sec"><i class="ti ti-bolt"></i> 共通設定 <span class="badge">H2C・A1 共通</span></p>
+      <div class="sr"><span class="sl">電気代（円/kWh）</span><input type="range" min="20" max="35" step="1" value="25" id="c-elec" oninput="syncAll()"><span class="sv" id="c-elec-out">¥25</span></div>
+      <div class="sr"><span class="sl">その他管理費（月）</span><input type="range" min="0" max="30000" step="1000" value="10000" id="c-other" oninput="syncAll()"><span class="sv" id="c-other-out">¥10,000</span></div>
+    </div>
+    <div class="machine-tabs">
+      <div class="mtab active" id="mtab-h2c" onclick="switchMachine('h2c')">
+        <input type="checkbox" id="chk-h2c" checked onchange="toggleMachine('h2c')" onclick="event.stopPropagation()">
+        <span>H2C</span>
+      </div>
+      <div class="mtab" id="mtab-a1" onclick="switchMachine('a1')">
+        <input type="checkbox" id="chk-a1" checked onchange="toggleMachine('a1')" onclick="event.stopPropagation()">
+        <span>A1</span>
+      </div>
+    </div>
+    <div id="mpanel-h2c" class="machine-panel active">
+      <div class="card">
+        <p class="sec"><i class="ti ti-printer"></i> H2C 個別設定</p>
+        <div class="sr"><span class="sl">機械代</span><input type="range" min="50000" max="1000000" step="10000" value="400000" id="h2c-machine" oninput="syncAll()"><span class="sv" id="h2c-machine-out">¥400,000</span></div>
+        <div class="sr"><span class="sl">償却年数</span><input type="range" min="1" max="5" step="1" value="2" id="h2c-years" oninput="syncAll()"><span class="sv" id="h2c-years-out">2年</span></div>
+        <div class="sr"><span class="sl">年間稼働日数</span><input type="range" min="100" max="300" step="10" value="200" id="h2c-days" oninput="syncAll()"><span class="sv" id="h2c-days-out">200日</span></div>
+        <div class="sr"><span class="sl">1日稼働時間</span><input type="range" min="4" max="16" step="1" value="8" id="h2c-hours" oninput="syncAll()"><span class="sv" id="h2c-hours-out">8時間</span></div>
+        <div class="sr"><span class="sl">稼働率</span><input type="range" min="10" max="100" step="5" value="70" id="h2c-util" oninput="syncAll()"><span class="sv" id="h2c-util-out">70%</span></div>
+        <div class="sr"><span class="sl">消耗品費（月）</span><input type="range" min="0" max="20000" step="1000" value="5000" id="h2c-consumable" oninput="syncAll()"><span class="sv" id="h2c-consumable-out">¥5,000</span></div>
+        <div class="sr"><span class="sl">利益率目標</span><input type="range" min="0" max="50" step="5" value="20" id="h2c-margin" oninput="syncAll()"><span class="sv" id="h2c-margin-out">20%</span></div>
+        <div class="divider"></div>
+        <div class="rate-grid">
+          <div class="metric"><p class="ml">原価単価</p><p class="mv" id="h2c-base-rate">-</p><p class="ms">/分</p></div>
+          <div class="metric"><p class="ml">推奨単価</p><p class="mv" id="h2c-rec-rate">-</p><p class="ms">/時間</p></div>
+        </div>
+      </div>
+    </div>
+    <div id="mpanel-a1" class="machine-panel">
+      <div class="card">
+        <p class="sec"><i class="ti ti-printer"></i> A1 個別設定</p>
+        <div class="sr"><span class="sl">機械代</span><input type="range" min="50000" max="1000000" step="10000" value="200000" id="a1-machine" oninput="syncAll()"><span class="sv" id="a1-machine-out">¥200,000</span></div>
+        <div class="sr"><span class="sl">償却年数</span><input type="range" min="1" max="5" step="1" value="2" id="a1-years" oninput="syncAll()"><span class="sv" id="a1-years-out">2年</span></div>
+        <div class="sr"><span class="sl">年間稼働日数</span><input type="range" min="100" max="300" step="10" value="200" id="a1-days" oninput="syncAll()"><span class="sv" id="a1-days-out">200日</span></div>
+        <div class="sr"><span class="sl">1日稼働時間</span><input type="range" min="4" max="16" step="1" value="8" id="a1-hours" oninput="syncAll()"><span class="sv" id="a1-hours-out">8時間</span></div>
+        <div class="sr"><span class="sl">稼働率</span><input type="range" min="10" max="100" step="5" value="70" id="a1-util" oninput="syncAll()"><span class="sv" id="a1-util-out">70%</span></div>
+        <div class="sr"><span class="sl">消耗品費（月）</span><input type="range" min="0" max="20000" step="1000" value="3000" id="a1-consumable" oninput="syncAll()"><span class="sv" id="a1-consumable-out">¥3,000</span></div>
+        <div class="sr"><span class="sl">利益率目標</span><input type="range" min="0" max="50" step="5" value="20" id="a1-margin" oninput="syncAll()"><span class="sv" id="a1-margin-out">20%</span></div>
+        <div class="divider"></div>
+        <div class="rate-grid">
+          <div class="metric"><p class="ml">原価単価</p><p class="mv" id="a1-base-rate">-</p><p class="ms">/分</p></div>
+          <div class="metric"><p class="ml">推奨単価</p><p class="mv" id="a1-rec-rate">-</p><p class="ms">/時間</p></div>
+        </div>
       </div>
     </div>
   </div>
-
+ 
+  <!-- 素材管理 -->
   <div id="panel-materials" class="panel">
+    <div class="admin-bar">
+      <div class="admin-badge" onclick="lockTab('materials')"><i class="ti ti-lock-open"></i> 管理者モード — ロックする</div>
+    </div>
     <div class="card">
-      <p class="section-label"><i class="ti ti-list"></i> 登録素材一覧（円/g）</p>
+      <p class="sec"><i class="ti ti-list"></i> 登録素材一覧（円/g）</p>
       <div id="mat-list"></div>
     </div>
     <div class="card">
-      <p class="section-label"><i class="ti ti-plus"></i> 素材を追加</p>
-      <div class="input-row"><label>素材名</label><input type="text" id="new-mat-name" placeholder="例：ASA" style="flex:1;"></div>
-      <div class="input-row"><label>単価（円/g）</label><input type="number" id="new-mat-price" value="5" min="0" step="0.1" style="flex:1;"></div>
-      <div class="input-row"><label>カラー・備考</label><input type="text" id="new-mat-color" placeholder="例：グレー" style="flex:1;"></div>
+      <p class="sec"><i class="ti ti-plus"></i> 素材を追加</p>
+      <div class="ir"><label>素材名</label><input type="text" id="new-mat-name" placeholder="例：ASA" style="flex:1;"></div>
+      <div class="ir"><label>単価（円/g）</label><input type="number" id="new-mat-price" value="5" min="0" step="0.1" style="flex:1;"></div>
+      <div class="ir"><label>カラー・備考</label><input type="text" id="new-mat-color" placeholder="例：グレー" style="flex:1;"></div>
       <button class="btn" onclick="addMaterial()"><i class="ti ti-plus"></i> 追加</button>
     </div>
   </div>
-
+ 
   <footer>H2C Quote Tool · 三栄産業 / 3DREAM</footer>
 </div>
-
+ 
+<!-- パスワードモーダル -->
+<div id="lock-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:28px;margin-bottom:12px;color:#6b6b66;"><i class="ti ti-lock"></i></div>
+    <p style="font-size:15px;font-weight:500;margin-bottom:6px;">管理者ログイン</p>
+    <p style="font-size:12px;color:#6b6b66;margin-bottom:18px;">パスワードを入力してください</p>
+    <input type="password" id="pw-input" placeholder="••••••" style="width:100%;text-align:center;letter-spacing:0.1em;" onkeydown="if(event.key==='Enter')checkPw()">
+    <p id="pw-err" class="err-msg"></p>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn" style="flex:1;justify-content:center;" onclick="closeModal()">キャンセル</button>
+      <button class="btn" style="flex:1;justify-content:center;border-color:#3B6D11;color:#3B6D11;" onclick="checkPw()">解除</button>
+    </div>
+  </div>
+</div>
+ 
 <script>
-const fmt = n => '¥' + Math.round(n).toLocaleString('ja-JP');
-const fmtD = (n, d) => '¥' + n.toFixed(d);
-
-let materials = [
-  { name: 'PLA', pricePerG: 3, color: '各色' },
-  { name: 'PETG', pricePerG: 4, color: '各色' },
-  { name: 'ASA', pricePerG: 6, color: '各色' },
-  { name: 'ABS', pricePerG: 4, color: '各色' },
-  { name: 'TPU', pricePerG: 8, color: '各色' },
-];
-
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+const fmt=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+const fmtD=(n,d)=>'¥'+n.toFixed(d);
+let materials=[{name:'PLA',pricePerG:3,color:'各色'},{name:'PETG',pricePerG:4,color:'各色'},{name:'ASA',pricePerG:6,color:'各色'},{name:'ABS',pricePerG:4,color:'各色'},{name:'TPU',pricePerG:8,color:'各色'}];
+let machineEnabled={h2c:true,a1:true};
+let unlocked={settings:false,materials:false};
+let pendingTab=null;
+ 
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
 }
-
-function getSettings() {
-  return {
-    machine: +document.getElementById('s-machine').value,
-    years: +document.getElementById('s-years').value,
-    days: +document.getElementById('s-days').value,
-    hours: +document.getElementById('s-hours').value,
-    util: +document.getElementById('s-util').value,
-    elec: +document.getElementById('s-elec').value,
-    consumable: +document.getElementById('s-consumable').value,
-    other: +document.getElementById('s-other').value,
-    margin: +document.getElementById('s-margin').value,
-  };
+ 
+function tryUnlock(name,el){
+  if(unlocked[name]){switchTab(name,el);return;}
+  pendingTab={name,el};
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-err').textContent='';
+  document.getElementById('lock-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('pw-input').focus(),50);
 }
-
-function calcRatePerMin(s) {
-  const totalHours = s.days * s.hours;
-  const actualHours = totalHours * s.util / 100;
-  const actualMins = actualHours * 60;
-  const depreciation = s.machine / s.years;
-  const consumableAnnual = s.consumable * 12;
-  const otherAnnual = s.other * 12;
-  const electricity = 0.4 * actualHours * s.elec;
-  const totalCost = depreciation + consumableAnnual + otherAnnual + electricity;
-  const baseRate = totalCost / actualMins;
-  const recRate = baseRate / (1 - s.margin / 100);
-  return { baseRate, recRate, elecPerMin: 0.4 * s.elec / 60 };
-}
-
-function syncSettings() {
-  const s = getSettings();
-  document.getElementById('s-machine-out').textContent = fmt(s.machine);
-  document.getElementById('s-years-out').textContent = s.years + '年';
-  document.getElementById('s-days-out').textContent = s.days + '日';
-  document.getElementById('s-hours-out').textContent = s.hours + '時間';
-  document.getElementById('s-util-out').textContent = s.util + '%';
-  document.getElementById('s-elec-out').textContent = '¥' + s.elec;
-  document.getElementById('s-consumable-out').textContent = fmt(s.consumable);
-  document.getElementById('s-other-out').textContent = fmt(s.other);
-  document.getElementById('s-margin-out').textContent = s.margin + '%';
-  const { baseRate, recRate } = calcRatePerMin(s);
-  document.getElementById('s-base-rate').textContent = fmtD(baseRate, 2);
-  document.getElementById('s-rec-rate').textContent = fmtD(recRate, 2);
-  document.getElementById('s-hour-rate').textContent = fmt(recRate * 60);
-  calcQuote();
-}
-
-function renderMaterials() {
-  const list = document.getElementById('mat-list');
-  const sel = document.getElementById('mat-select');
-  const prev = sel ? sel.value : '0';
-  list.innerHTML = materials.map((m, i) =>
-    `<div class="mat-row">
-      <span class="mat-name">${m.name} <span style="font-size:11px;color:var(--text-muted);">${m.color || ''}</span></span>
-      <span class="mat-price">¥${m.pricePerG.toFixed(1)}/g</span>
-      <button class="btn" style="padding:3px 8px;font-size:11px;" onclick="removeMaterial(${i})"><i class="ti ti-trash"></i></button>
-    </div>`
-  ).join('');
-  sel.innerHTML = materials.map((m, i) => `<option value="${i}">${m.name}</option>`).join('');
-  sel.value = Math.min(+prev, materials.length - 1);
-}
-
-function addMaterial() {
-  const name = document.getElementById('new-mat-name').value.trim();
-  const price = +document.getElementById('new-mat-price').value;
-  const color = document.getElementById('new-mat-color').value.trim();
-  if (!name || isNaN(price)) return;
-  materials.push({ name, pricePerG: price, color });
-  document.getElementById('new-mat-name').value = '';
-  document.getElementById('new-mat-color').value = '';
-  renderMaterials();
-  calcQuote();
-}
-
-function removeMaterial(i) {
-  if (materials.length <= 1) return;
-  materials.splice(i, 1);
-  renderMaterials();
-  calcQuote();
-}
-
-function calcQuote() {
-  const s = getSettings();
-  const { recRate, elecPerMin } = calcRatePerMin(s);
-  const mins = +document.getElementById('print-min').value || 0;
-  const grams = +document.getElementById('filament-g').value || 0;
-  const qty = +document.getElementById('qty').value || 1;
-  const matIdx = +document.getElementById('mat-select').value;
-  const mat = materials[matIdx] || materials[0];
-  const machineFee = recRate * mins;
-  const elecFee = elecPerMin * mins;
-  const filamentFee = grams * mat.pricePerG;
-  const costTotal = machineFee + elecFee + filamentFee;
-  const total = costTotal;
-  document.getElementById('q-machine-fee').textContent = fmt(machineFee);
-  document.getElementById('q-elec-fee').textContent = fmt(elecFee);
-  document.getElementById('q-filament-fee').textContent = `${fmt(filamentFee)}（${grams}g × ¥${mat.pricePerG}/g）`;
-  document.getElementById('q-cost-total').textContent = fmt(costTotal);
-  document.getElementById('q-total').textContent = fmt(total);
-  document.getElementById('q-margin-tag').textContent = '利益率' + s.margin + '%込み';
-  document.getElementById('q-qty-label').textContent = qty + '個';
-  document.getElementById('q-total-qty').textContent = fmt(total * qty);
-  document.getElementById('q-rate-note').textContent = `推奨時間単価：${fmt(recRate * 60)}/h ／ ${mat.name} ¥${mat.pricePerG}/g`;
-}
-
-function parseBambu() {
-  const raw = document.getElementById('bambu-input').value;
-  let mins = null, grams = null;
-  const timePatterns = [
-    /(\d+)\s*h\s*(\d+)\s*m/i, /(\d+)\s*時間\s*(\d+)\s*分/,
-    /(\d+):(\d+)/, /(\d+)\s*h(?!r)/i, /(\d+)\s*時間/,
-    /印刷時間[^\d]*(\d+)/, /(\d+)\s*分/,
-  ];
-  for (const p of timePatterns) {
-    const m = raw.match(p);
-    if (!m) continue;
-    if (p.source.includes('h') && m[2] !== undefined && !p.source.includes('hr')) { mins = +m[1]*60 + +m[2]; break; }
-    if (p.source.includes('時間') && m[2] !== undefined) { mins = +m[1]*60 + +m[2]; break; }
-    if (p.source.includes(':')) { mins = +m[1]*60 + +m[2]; break; }
-    if (p.source.includes('h') || p.source.includes('時間') || p.source.includes('印刷')) { mins = +m[1]*60; break; }
-    mins = +m[1]; break;
+ 
+function checkPw(){
+  if(document.getElementById('pw-input').value==='3dream'){
+    unlocked[pendingTab.name]=true;
+    const tab=document.getElementById('tab-'+pendingTab.name);
+    tab.innerHTML=pendingTab.name==='settings'?'<i class="ti ti-settings"></i> 機械設定':'<i class="ti ti-package"></i> 素材管理';
+    closeModal();
+    switchTab(pendingTab.name,tab);
+  }else{
+    document.getElementById('pw-err').textContent='パスワードが違います';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
   }
-  const gramPatterns = [/(\d+\.?\d*)\s*g/i, /(\d+\.?\d*)\s*グラム/];
-  for (const p of gramPatterns) {
-    const m = raw.match(p);
-    if (m) { grams = +m[1]; break; }
-  }
-  if (mins !== null) document.getElementById('print-min').value = Math.round(mins);
-  if (grams !== null) document.getElementById('filament-g').value = grams;
-  const ta = document.getElementById('bambu-input');
-  ta.style.borderColor = (mins !== null || grams !== null) ? 'var(--accent)' : 'var(--danger)';
+}
+ 
+function closeModal(){document.getElementById('lock-modal').classList.remove('show');}
+ 
+function lockTab(name){
+  unlocked[name]=false;
+  const tab=document.getElementById('tab-'+name);
+  tab.innerHTML=name==='settings'?'<i class="ti ti-lock"></i> 機械設定':'<i class="ti ti-lock"></i> 素材管理';
+  tab.classList.remove('active');
+  document.getElementById('panel-'+name).classList.remove('active');
+  document.getElementById('tab-quote').classList.add('active');
+  document.getElementById('panel-quote').classList.add('active');
+}
+ 
+function toggleQuoteMachine(name){
+  machineEnabled[name]=!machineEnabled[name];
+  const enabled=Object.values(machineEnabled).filter(Boolean).length;
+  if(enabled===0){machineEnabled[name]=true;}
+  ['h2c','a1'].forEach(k=>{
+    document.getElementById('toggle-'+k).className='toggle-btn'+(machineEnabled[k]?' on':' off');
+  });
+  const labels={h2c:'H2C',a1:'A1'};
+  const active=Object.entries(machineEnabled).filter(([k,v])=>v).map(([k])=>labels[k]);
+  document.getElementById('toggle-note').textContent=active.join('・')+' 有効';
+  updateMachineSelect();calcQuote();
+}
+ 
+function switchMachine(name){
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.machine-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mtab-'+name).classList.add('active');
+  document.getElementById('mpanel-'+name).classList.add('active');
+}
+ 
+function toggleMachine(name){
+  machineEnabled[name]=document.getElementById('chk-'+name).checked;
+  updateMachineSelect();calcQuote();
+}
+ 
+function getCommon(){return{elec:+document.getElementById('c-elec').value,other:+document.getElementById('c-other').value};}
+ 
+function getMachineSettings(p){
+  return{machine:+document.getElementById(p+'-machine').value,years:+document.getElementById(p+'-years').value,days:+document.getElementById(p+'-days').value,hours:+document.getElementById(p+'-hours').value,util:+document.getElementById(p+'-util').value,consumable:+document.getElementById(p+'-consumable').value,margin:+document.getElementById(p+'-margin').value};
+}
+ 
+function calcRate(p){
+  const s=getMachineSettings(p);const c=getCommon();
+  const ah=s.days*s.hours*s.util/100;
+  const tc=s.machine/s.years+s.consumable*12+c.other*12+0.4*ah*c.elec;
+  const base=tc/(ah*60);
+  return{baseRate:base,recRate:base/(1-s.margin/100),elecPerMin:0.4*c.elec/60,margin:s.margin};
+}
+ 
+function syncSlider(id,suffix){
+  const v=+document.getElementById(id).value;
+  const el=document.getElementById(id+'-out');if(!el)return;
+  el.textContent=suffix==='¥'?fmt(v):suffix==='elec'?'¥'+v:v+suffix;
+}
+ 
+function syncAll(){
+  syncSlider('c-elec','elec');syncSlider('c-other','¥');
+  ['h2c','a1'].forEach(p=>{
+    ['machine','consumable'].forEach(k=>syncSlider(p+'-'+k,'¥'));
+    syncSlider(p+'-years','年');syncSlider(p+'-days','日');
+    syncSlider(p+'-hours','時間');syncSlider(p+'-util','%');syncSlider(p+'-margin','%');
+    const{baseRate,recRate}=calcRate(p);
+    document.getElementById(p+'-base-rate').textContent=fmtD(baseRate,2);
+    document.getElementById(p+'-rec-rate').textContent=fmt(recRate*60);
+  });
   calcQuote();
 }
-
-function clearBambu() {
-  document.getElementById('bambu-input').value = '';
-  document.getElementById('bambu-input').style.borderColor = '';
+ 
+function updateMachineSelect(){
+  const sel=document.getElementById('q-machine-sel');
+  const prev=sel.value;
+  sel.innerHTML=Object.entries(machineEnabled).filter(([k,v])=>v).map(([k])=>`<option value="${k}">${k.toUpperCase()}</option>`).join('');
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;
 }
-
-renderMaterials();
-syncSettings();
+ 
+function renderMaterials(){
+  const list=document.getElementById('mat-list');
+  const sel=document.getElementById('mat-select');
+  const prev=sel?sel.value:'0';
+  list.innerHTML=materials.map((m,i)=>`<div class="mat-row"><span class="mat-name">${m.name} <span style="font-size:11px;color:#6b6b66;">${m.color||''}</span></span><span class="mat-price">¥${m.pricePerG.toFixed(1)}/g</span><button class="btn" style="padding:3px 8px;font-size:11px;" onclick="removeMaterial(${i})"><i class="ti ti-trash"></i></button></div>`).join('');
+  sel.innerHTML=materials.map((m,i)=>`<option value="${i}">${m.name}</option>`).join('');
+  sel.value=Math.min(+prev,materials.length-1);
+}
+ 
+function addMaterial(){
+  const name=document.getElementById('new-mat-name').value.trim();
+  const price=+document.getElementById('new-mat-price').value;
+  const color=document.getElementById('new-mat-color').value.trim();
+  if(!name||isNaN(price))return;
+  materials.push({name,pricePerG:price,color});
+  document.getElementById('new-mat-name').value='';document.getElementById('new-mat-color').value='';
+  renderMaterials();calcQuote();
+}
+ 
+function removeMaterial(i){if(materials.length<=1)return;materials.splice(i,1);renderMaterials();calcQuote();}
+ 
+function calcQuote(){
+  const prefix=document.getElementById('q-machine-sel').value||'h2c';
+  if(!machineEnabled[prefix])return;
+  const{recRate,elecPerMin,margin}=calcRate(prefix);
+  const mins=+document.getElementById('print-min').value||0;
+  const grams=+document.getElementById('filament-g').value||0;
+  const qty=+document.getElementById('qty').value||1;
+  const mat=materials[+document.getElementById('mat-select').value]||materials[0];
+  const mf=recRate*mins,ef=elecPerMin*mins,ff=grams*mat.pricePerG,ct=mf+ef+ff;
+  document.getElementById('q-machine-fee').textContent=fmt(mf);
+  document.getElementById('q-elec-fee').textContent=fmt(ef);
+  document.getElementById('q-filament-fee').textContent=`${fmt(ff)}（${grams}g × ¥${mat.pricePerG}/g）`;
+  document.getElementById('q-cost-total').textContent=fmt(ct);
+  document.getElementById('q-total').textContent=fmt(ct);
+  document.getElementById('q-margin-tag').textContent='利益率'+margin+'%込み';
+  document.getElementById('q-qty-label').textContent=qty+'個';
+  document.getElementById('q-total-qty').textContent=fmt(ct*qty);
+  document.getElementById('q-rate-note').textContent=`${prefix.toUpperCase()} 推奨単価：${fmt(recRate*60)}/h ／ ${mat.name} ¥${mat.pricePerG}/g`;
+}
+ 
+function parseBambu(){
+  const raw=document.getElementById('bambu-input').value;let mins=null,grams=null;
+  const tp=[/(\d+)\s*h\s*(\d+)\s*m/i,/(\d+)\s*時間\s*(\d+)\s*分/,/(\d+):(\d+)/,/(\d+)\s*h(?!r)/i,/(\d+)\s*時間/,/(\d+)\s*分/];
+  for(const p of tp){const m=raw.match(p);if(!m)continue;if(m[2]!==undefined){mins=+m[1]*60+ +m[2];}else{mins=+m[1]*60;}break;}
+  const gp=[/(\d+\.?\d*)\s*g/i,/(\d+\.?\d*)\s*グラム/];
+  for(const p of gp){const m=raw.match(p);if(m){grams=+m[1];break;}}
+  if(mins!==null)document.getElementById('print-min').value=Math.round(mins);
+  if(grams!==null)document.getElementById('filament-g').value=grams;
+  document.getElementById('bambu-input').style.borderColor=(mins!==null||grams!==null)?'#3B6D11':'#A32D2D';
+  calcQuote();
+}
+ 
+function clearBambu(){document.getElementById('bambu-input').value='';document.getElementById('bambu-input').style.borderColor='';}
+ 
+updateMachineSelect();renderMaterials();syncAll();
 </script>
 </body>
 </html>
+ 
