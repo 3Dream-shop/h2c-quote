@@ -224,8 +224,13 @@ const firebaseConfig = {
   appId: "1:35749878551:web:3b58ba5799f15627837552"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let db = null;
+try {
+  const app = firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) {
+  console.warn('Firebase init failed:', e);
+}
 
 const fmt=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
 const fmtD=(n,d)=>'¥'+n.toFixed(d);
@@ -244,6 +249,7 @@ function setStatus(type,msg){
 }
 
 async function saveSettings(){
+  if(!db){setStatus('error','DB未接続');return;}
   setStatus('saving','保存中...');
   try{
     const data={
@@ -267,6 +273,7 @@ function scheduleSave(){
 }
 
 async function loadSettings(){
+  if(!db){console.warn('DB not ready');return;}
   try{
     const snap=await db.collection('settings').doc('main').get();
     if(!snap.exists())return;
