@@ -311,7 +311,7 @@ function switchTab(name,el){
 };
 
 function tryUnlock(name,el){
-  if(unlocked[name]){window.switchTab(name,el);return;}
+  if(unlocked[name]){switchTab(name,el);return;}
   pendingTab={name,el};
   document.getElementById('pw-input').value='';
   document.getElementById('pw-err').textContent='';
@@ -324,8 +324,8 @@ function checkPw(){
     unlocked[pendingTab.name]=true;
     const tab=document.getElementById('tab-'+pendingTab.name);
     tab.innerHTML=pendingTab.name==='settings'?'<i class="ti ti-settings"></i> 機械設定':'<i class="ti ti-package"></i> 素材管理';
-    window.closeModal();
-    window.switchTab(pendingTab.name,tab);
+    closeModal();
+    switchTab(pendingTab.name,tab);
   }else{
     document.getElementById('pw-err').textContent='パスワードが違います';
     document.getElementById('pw-input').value='';
